@@ -9,6 +9,7 @@ class Tweet {
 }
 
 
+
 /**
  * 
  * @param {*} This is the id of the tweet whoose data i need to get
@@ -30,3 +31,21 @@ async function getTweetText(id) {
 
     })
 }
+/**
+ * @param {*} This is the image you want to tweet
+ * @returns the tweet as an object
+ */
+async function tweetImage(image) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const tweet = await T.post("media/upload", {
+                media_data: image
+            });
+            return resolve(tweet);
+        } catch(error) {
+            reject(error);
+        }
+    })
+}
+
+export default Tweet;

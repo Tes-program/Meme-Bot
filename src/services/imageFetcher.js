@@ -1,7 +1,10 @@
 import express from "express"
+import { saveImageUrl } from "../model/tweetRespond";
 import dotenv from "dotenv"
 import { S3 } from "aws-sdk";
 const AWS = require("aws-sdk");
+
+const app = express();
 
 const image_fetcher = express.Router();
 
@@ -22,10 +25,13 @@ app.get("/imageFetcher", (req, res) => {
         .promise();
         return data;
     }
+// save image link to the database saveImageUrl
 
     getImage()
     .then((img) => {
-
+        let image = encode(img.Body);
+        saveImageUrl(image);
+        res.send(image);
     })
 
     function encode(data) {

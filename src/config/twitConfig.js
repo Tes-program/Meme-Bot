@@ -1,5 +1,5 @@
-require('dotenv').config()
-
+import dotenv from 'dotenv';
+dotenv.config();
 export const twitConfig = {
     consumer_key:  process.env.CONSUMER_KEY,       
     consumer_secret: process.env.CONSUMER_KEY_SECRET,

@@ -1,6 +1,8 @@
 import Twit from "twit";
-import { twitConfig } from "../config/twitConfig";
+import { twitConfig } from "../config/twitConfig.js";
+console.log(twitConfig)
 const T = new Twit(twitConfig)
+
 
 class Tweet {
     constructor() {

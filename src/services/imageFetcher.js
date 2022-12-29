@@ -1,5 +1,5 @@
 import express from "express"
-import { saveImageUrl } from "../model/tweetRespond";
+import { saveImageUrl } from "../model/tweetRespond.js";
 import dotenv from "dotenv"
 import { S3 } from "aws-sdk";
 const AWS = require("aws-sdk");

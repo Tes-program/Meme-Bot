@@ -4,7 +4,7 @@ import { saveMention, fetchMention } from "./model/tweetRespond";
 export const tweet = new Tweet();
 
 // cron job to run every 1 minutes
-cron.schedule("*/1 * * * *", () => {
+cron.schedule("*/1 * * * *", async () => {
    // Search for tweets that mention your bot's handle and include a specific keyword that will be saved to tweet_text
     const tweets = await tweet.searchTweets(
         "from:tweetr_bot_1 meme",
@@ -27,4 +27,5 @@ cron.schedule("*/1 * * * *", () => {
             tweet_user: user,
             image_url: data.tweet,
         });
-    }
+    });
+});

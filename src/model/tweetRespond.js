@@ -18,6 +18,10 @@ const mentionSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    video_url: {
+        type: String,
+        required: false,
+    },
 });
 
 const Mention = mongoose.model("mention", mentionSchema);

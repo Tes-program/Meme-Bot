@@ -1,31 +1,91 @@
 import cron from "node-cron";
 import Tweet from "./utils/twitter.js";
 import { saveMention, fetchMention } from "./model/tweetRespond.js";
-export const tweet = new Tweet();
+import { getImage } from "./services/imageFetcher.js";
+import { generateReply } from "./utils/generateReply.js";
+
+async function replyToTweet(base64, id, text, user) {
+    try {
+        Tweet.post('media/upload', { media_data: base64 }, function (err, data, response) {
+            // now we can assign alt text to the media, for use by screen readers and
+            // other text-based presentations and interpreters
+            var mediaIdStr = data.media_id_string
+            var meta_params = { media_id: mediaIdStr}
+          
+            Tweet.post('media/metadata/create', meta_params, function (err, data, response) {
+              if (!err) {
+                // now we can reference the media and post a tweet (media will attach to the tweet)
+                var params = { status: generateReply(user, text), media_ids: [mediaIdStr], in_reply_to_status_id: id, }
+          
+                Tweet.post('statuses/update', params, function (err, data, response) {
+                    if (err) {
+                       return console.log(err)
+                    }
+                  console.log(data)
+                })
+              }
+            })
+          })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+function encode(data) {
+    let buf = Buffer.from(data);
+    let base64 = buf.toString("base64");
+    return base64;
+}
+
+
+
+
+
+
 
 // cron job to run every 1 minutes
-cron.schedule("*/1 * * * *", async () => {
-   // Search for tweets that mention your bot's handle and include a specific keyword that will be saved to tweet_text
-    const tweets = await tweet.searchTweets(
-        "from:memebotv2",
-        "tweet_text"
-    );
-    // loop through the tweets
-    tweets.forEach(async (tweet) => {
+cron.schedule("*/5 * * * * *", async () => { 
+    // Search for tweets that mention your bot's handle and include a specific keyword that will be saved to tweet_text
+    try {
+     const tweets = await Tweet.get("statuses/mentions_timeline", {
+         count: 1,
+         tweet_mode: "extended",
+       });
+       // loop through the tweets
+     tweets.data.forEach(async (tweet) => {
+        // console.log(tweets.data) 
         // get the tweet id
-        const id = tweet.id_str;
-        // get the tweet text
-        const text = tweet.text;
-        // get the tweet user
-        const user = tweet.user.screen_name;
-        // get the tweet data
-        const data = await Tweet.getTweetText(id);
+         const id = tweet.id_str;
+        //  console.log(id)
+         // get the tweet text
+         let text = tweet.full_text;
+        //  text = text.replace('@memebotv2', '')
+        //  text = text.trim()
+        let pattern = /@[^\s]+\s/g;
+        text = text.replace(pattern, '');
+        //  console.log(text)
+         // get the tweet user
+         let user = tweet.user.screen_name;
+        //  console.log(user)
+         const data = await getImage(text)
+         const base64 = encode(data.Body);
+        //  console.log(base64)
+            await replyToTweet(base64, id, text, user);
+        //  console.log(user)
         // save the tweet data to the database
         await saveMention({
             tweet_id: id,
             tweet_text: text,
             tweet_user: user,
-            image_url: data.tweet,
+            image_url: base64,
         });
     });
+   } catch (error) {
+       console.log(error)
+   }
+
 });
+
+   
+    

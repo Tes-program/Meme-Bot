@@ -6,12 +6,12 @@ AWS.config.update({
     secretAccessKey: process.env.AWSSecretKey,
     region: 'us-east-1'
 });
- 
-export const getImage = async (keyword)  => {
+
+export const getVideo = async (Number)  => {
     const data = new AWS.S3()
         .getObject({
             Bucket: 'teslimmeme',
-            Key: `fetchedmeme/${keyword}`
+            Key: `videomemes/${Number}.mp4`
         })
         .promise();
     return data;
@@ -20,9 +20,10 @@ export const getImage = async (keyword)  => {
 
 function encode(data) {
     let buf = Buffer.from(data);
-    let base64 = buf.toString("base64");
-    return base64;
+    let base64video = buf.toString("base64");
+    return base64video;
 }
  
 
  
+

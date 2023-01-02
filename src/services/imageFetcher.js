@@ -1,6 +1,6 @@
-import dotenv from "dotenv"
 import AWS from "aws-sdk"
-dotenv.config({ path: require('find-config')('.env')});
+
+
 AWS.config.update({
     accessKeyId: process.env.AWSAccessKeyId,
     secretAccessKey: process.env.AWSSecretKey,

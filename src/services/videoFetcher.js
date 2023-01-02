@@ -1,26 +1,24 @@
-import dotenv from "dotenv"
 import AWS from "aws-sdk"
-dotenv.config({ path: require('find-config')('.env')});
 AWS.config.update({
     accessKeyId: process.env.AWSAccessKeyId,
     secretAccessKey: process.env.AWSSecretKey,
     region: 'us-east-1'
 });
 
-export const getVideo = async (Number)  => {
-    const data = new AWS.S3()
+export const getVideo = async (number)  => {
+    const Videodata = new AWS.S3()
         .getObject({
             Bucket: 'teslimmeme',
-            Key: `videomemes/${Number}.mp4`
+            Key: `videomemes/${number}.mp4`
         })
         .promise();
-    return data;
+    return Videodata;
 }
   
 
-function encode(data) {
-    let buf = Buffer.from(data);
-    let base64video = buf.toString("base64");
+function videoEncoder(Videodata) {
+    let buffer = Buffer.from(data);
+    let base64video = buffer.toString("base64");
     return base64video;
 }
  

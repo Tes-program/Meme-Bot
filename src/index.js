@@ -2,7 +2,9 @@ import cron from "node-cron";
 import Tweet from "./utils/twitter.js";
 import { saveMention, fetchMention } from "./model/tweetRespond.js";
 import { getImage } from "./services/imageFetcher.js";
+import { getVideo } from "./services/videoFetcher.js";
 import { generateReply } from "./utils/generateReply.js";
+import app from "./app.js";
 
 async function replyToTweet(base64, id, text, user) {
     try {
@@ -31,6 +33,34 @@ async function replyToTweet(base64, id, text, user) {
     }
 }
 
+// Post a video every 4 hours
+async function postVideo(base64video, videoNumber) {
+  try {
+    Tweet.post('media/upload', { media_data: base64video}, function (err,data,reponse) {
+        var mediaIdStr = data.media_id_string
+        var meta_params = { media_id: mediaIdStr}
+
+        Tweet.post('media/metadata/create', meta_params, function (err, data, response) {
+          if (!err) {
+            // now we can reference the media and post a tweet (media will attach to the tweet)
+            var params = { status: `This is video number ${videoNumber}`, media_ids: [mediaIdStr], }
+
+            Tweet.post('statuses/update', params, function (err, data, response) {
+                if (err) {
+                   return console.log(err)
+                }
+              console.log(data)
+            })
+          }
+
+    }
+    )
+  }
+  )}
+  catch (error) {
+    console.log(error)
+  }
+}
 
 function encode(data) {
     let buf = Buffer.from(data);
@@ -38,14 +68,20 @@ function encode(data) {
     return base64;
 }
 
+function videoEncoder(videoData) {
+  let buffer = Buffer.from(videoData);
+  let base64video = buffer.toString("base64");
+  return base64video;
+}
 
+let videoNumber = 1
 
 
 
 
 
 // cron job to run every 1 minutes
-cron.schedule("*/5 * * * * *", async () => { 
+cron.schedule("*/20 * * * * *", async () => { 
     // Search for tweets that mention your bot's handle and include a specific keyword that will be saved to tweet_text
     try {
      const tweets = await Tweet.get("statuses/mentions_timeline", {
@@ -53,7 +89,13 @@ cron.schedule("*/5 * * * * *", async () => {
          tweet_mode: "extended",
        });
        // loop through the tweets
-     tweets.data.forEach(async (tweet) => {
+       for (const tweet of tweets.data) {
+      const mention = await fetchMention(tweet.id_str);
+      if (mention) {
+        console.log("Stopped", tweet.id_str )
+        return;
+      }
+      console.log("Processing tweet", tweet.id_str)
         // console.log(tweets.data) 
         // get the tweet id
          const id = tweet.id_str;
@@ -69,23 +111,38 @@ cron.schedule("*/5 * * * * *", async () => {
          let user = tweet.user.screen_name;
         //  console.log(user)
          const data = await getImage(text)
+         const videoData = await getVideo(text)
          const base64 = encode(data.Body);
+         const base64video = videoEncoder(videoData.Body);
         //  console.log(base64)
+        await saveMention({
+          tweet_id: id,
+          tweet_text: text,
+          tweet_user: user,
+          image_url: base64,
+      });
             await replyToTweet(base64, id, text, user);
         //  console.log(user)
         // save the tweet data to the database
-        await saveMention({
-            tweet_id: id,
-            tweet_text: text,
-            tweet_user: user,
-            image_url: base64,
-        });
-    });
+        
+
+    };
    } catch (error) {
        console.log(error)
    }
 
 });
 
-   
-    
+
+cron.schedule('0 */3 * * *', async () => {
+  if (videoNumber > 2000) {
+    cron.destory()
+  } else {
+    const videoData = await getVideo(videoNumber)
+    const base64video = videoEncoder(videoData.Body);
+    await postVideo(base64video, videoNumber)
+    videoNumber++
+  }
+
+
+})

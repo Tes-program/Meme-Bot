@@ -1,8 +1,8 @@
 import Twit from "twit";
 import { twitConfig } from "../config/twitConfig.js";
 import { generateReply } from "./generateReply.js";
+
 const T = new Twit(twitConfig)
-console.log(T)
 
 
 class Tweet {

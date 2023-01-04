@@ -4,6 +4,8 @@ import { saveMention, fetchMention } from "./model/tweetRespond.js";
 import { getImage } from "./services/imageFetcher.js";
 import { getVideo } from "./services/videoFetcher.js";
 import { generateReply } from "./utils/generateReply.js";
+import { fileURLToPath } from "url";
+import path from "path";
 import app from "./app.js";
 
 async function replyToTweet(base64, id, text, user) {
@@ -33,10 +35,14 @@ async function replyToTweet(base64, id, text, user) {
     }
 }
 
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
+console.log(__dirname)
 // Post a video every 3 hours
 async function upload (videoNumber) {
   try {
-    var filePath = '/home/teslim/memebot/src/videos/video.mp4';
+    var filePath = path.join(__dirname, `videos/video.mp4`)
     Tweet.postMediaChunked({ file_path: filePath }, async function (err, data, response) {
       if (err) return console.log(err);
       console.log("tweeting", data.media_id);
@@ -72,7 +78,7 @@ function encode(data) {
 
 let videoNumber = 0
 
-cron.schedule('0 */3 * * * ', async () => {
+cron.schedule('0 */1 * * * *', async () => {
   if (videoNumber > 2000) {
     cron.destory()
   } else {

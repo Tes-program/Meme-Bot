@@ -1,27 +1,31 @@
 import AWS from "aws-sdk"
+import fs from "fs"
+
+
 AWS.config.update({
     accessKeyId: process.env.AWSAccessKeyId,
     secretAccessKey: process.env.AWSSecretKey,
     region: 'us-east-1'
 });
 
-export const getVideo = async (number)  => {
-    const Videodata = new AWS.S3()
+export const getVideo = (keyword) => {
+    return new Promise((resolve, reject) => {
+      const data = new AWS.S3()
         .getObject({
-            Bucket: 'teslimmeme',
-            Key: `videomemes/${number}.mp4`
-        })
-        .promise();
-    return Videodata;
-}
+          Bucket: 'teslimmeme',
+          Key: `videomemes/${keyword}.mp4`,
+        });
+      const stream = data.createReadStream();
+      const file = fs.createWriteStream('/home/teslim/memebot/src/videos/video.mp4');
+      stream.pipe(file);
+      stream.on('end', () => {
+        resolve();
+      });
+      stream.on('error', (err) => {
+        reject(err);
+      });
+    });
+  };
   
 
-function videoEncoder(Videodata) {
-    let buffer = Buffer.from(data);
-    let base64video = buffer.toString("base64");
-    return base64video;
-}
- 
-
- 
-
+    

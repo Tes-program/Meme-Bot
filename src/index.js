@@ -33,34 +33,35 @@ async function replyToTweet(base64, id, text, user) {
     }
 }
 
-// Post a video every 4 hours
-async function postVideo(base64video, videoNumber) {
+// Post a video every 3 hours
+async function upload (videoNumber) {
   try {
-    Tweet.post('media/upload', { media_data: base64video}, function (err,data,reponse) {
-        var mediaIdStr = data.media_id_string
-        var meta_params = { media_id: mediaIdStr}
-
-        Tweet.post('media/metadata/create', meta_params, function (err, data, response) {
-          if (!err) {
-            // now we can reference the media and post a tweet (media will attach to the tweet)
-            var params = { status: `This is video number ${videoNumber}`, media_ids: [mediaIdStr], }
-
-            Tweet.post('statuses/update', params, function (err, data, response) {
-                if (err) {
-                   return console.log(err)
-                }
-              console.log(data)
-            })
-          }
-
-    }
-    )
-  }
-  )}
-  catch (error) {
-    console.log(error)
+    var filePath = '/home/teslim/memebot/src/videos/video.mp4';
+    Tweet.postMediaChunked({ file_path: filePath }, async function (err, data, response) {
+      if (err) return console.log(err);
+      console.log("tweeting", data.media_id);
+      let succeeded = false;
+      while (!succeeded) {
+        const result = await Tweet.get('media/upload', {
+          command: 'STATUS',
+          media_id: data.media_id_string,
+        });
+        if (result.data.processing_info.state === 'succeeded') {
+          succeeded = true;
+        }
+      }
+      var params = { status: `This is video meme ${videoNumber}`, media_ids: [data.media_id_string] };
+      const tweet = await Tweet.post('statuses/update', params);
+    });
+  } catch (error) {
+    return console.log(error)
   }
 }
+
+
+
+
+
 
 function encode(data) {
     let buf = Buffer.from(data);
@@ -68,19 +69,24 @@ function encode(data) {
     return base64;
 }
 
-function videoEncoder(videoData) {
-  let buffer = Buffer.from(videoData);
-  let base64video = buffer.toString("base64");
-  return base64video;
-}
 
-let videoNumber = 1
+let videoNumber = 0
+
+cron.schedule('0 */3 * * * ', async () => {
+  if (videoNumber > 2000) {
+    cron.destory()
+  } else {
+    videoNumber++
+    await getVideo(videoNumber)
+    upload(videoNumber)
+  }
+
+
+})
 
 
 
-
-
-// cron job to run every 1 minutes
+// cron job to run every 20 seconds
 cron.schedule("*/20 * * * * *", async () => { 
     // Search for tweets that mention your bot's handle and include a specific keyword that will be saved to tweet_text
     try {
@@ -92,10 +98,10 @@ cron.schedule("*/20 * * * * *", async () => {
        for (const tweet of tweets.data) {
       const mention = await fetchMention(tweet.id_str);
       if (mention) {
-        console.log("Stopped", tweet.id_str )
+        // console.log("Stopped", tweet.id_str )
         return;
       }
-      console.log("Processing tweet", tweet.id_str)
+      // console.log("Processing tweet", tweet.id_str)
         // console.log(tweets.data) 
         // get the tweet id
          const id = tweet.id_str;
@@ -111,9 +117,7 @@ cron.schedule("*/20 * * * * *", async () => {
          let user = tweet.user.screen_name;
         //  console.log(user)
          const data = await getImage(text)
-         const videoData = await getVideo(text)
          const base64 = encode(data.Body);
-         const base64video = videoEncoder(videoData.Body);
         //  console.log(base64)
         await saveMention({
           tweet_id: id,
@@ -132,17 +136,3 @@ cron.schedule("*/20 * * * * *", async () => {
    }
 
 });
-
-
-cron.schedule('0 */3 * * *', async () => {
-  if (videoNumber > 2000) {
-    cron.destory()
-  } else {
-    const videoData = await getVideo(videoNumber)
-    const base64video = videoEncoder(videoData.Body);
-    await postVideo(base64video, videoNumber)
-    videoNumber++
-  }
-
-
-})

@@ -72,7 +72,7 @@ function encode(data) {
 
 let videoNumber = 0
 
-cron.schedule('0 */1 * * * *', async () => {
+cron.schedule('0 */3 * * * *', async () => {
   if (videoNumber > 2000) {
     cron.destory()
   } else {
@@ -87,7 +87,7 @@ cron.schedule('0 */1 * * * *', async () => {
 
 
 // cron job to run every 20 seconds
-cron.schedule("*/20 * * * * *", async () => { 
+cron.schedule("0 */1 * * * *", async () => { 
     // Search for tweets that mention your bot's handle and include a specific keyword that will be saved to tweet_text
     try {
      const tweets = await Tweet.get("statuses/mentions_timeline", {

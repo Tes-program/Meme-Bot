@@ -38,7 +38,6 @@ async function replyToTweet(base64, id, text, user) {
 const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
-console.log(__dirname)
 // Post a video every 3 hours
 async function upload (videoNumber) {
   try {
@@ -63,11 +62,6 @@ async function upload (videoNumber) {
     return console.log(error)
   }
 }
-
-
-
-
-
 
 function encode(data) {
     let buf = Buffer.from(data);

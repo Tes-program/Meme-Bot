@@ -16,7 +16,7 @@ export const getVideo = (keyword) => {
           Key: `videomemes/${keyword}.mp4`,
         });
       const stream = data.createReadStream();
-      const file = fs.createWriteStream(`./videos/video.mp4`);
+      const file = fs.createWriteStream(`videos/video.mp4`);
       stream.pipe(file);
       stream.on('end', () => {
         resolve();

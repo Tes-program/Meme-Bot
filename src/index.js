@@ -103,7 +103,7 @@ function encode(data) {
 
 let videoNumber = 0
 
-cron.schedule('*/10 * * * * *', async () => {
+cron.schedule('0 */2 * * * ', async () => {
   if (videoNumber > 2000) {
     cron.destory()
   } else {
@@ -168,22 +168,3 @@ cron.schedule("0 */1 * * * *", async () => {
 
 });
 
-
-// // Delete a version of a video every 3 hours
-// cron.schedule('0 */15 * * * *', () => {
-//  const filePath = path.join(__dirname, `videos/${videoNumber}.mp4`)
-//  if (videoNumber > 2000) {
-//    cron.destory()
-//  }
-//  else {
-//   videoNumber++
-//   fs.unlink(filePath, (err) => {
-//     if (err) {
-//       console.error(err)
-//       return
-//     }
-//     //file removed
-//   } )
-//  }
-
-// })

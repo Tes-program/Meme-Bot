@@ -72,13 +72,13 @@ function encode(data) {
 
 let videoNumber = 0
 
-cron.schedule('0 */2 * * *', async () => {
+cron.schedule('0 */1 * * * *', async () => {
   if (videoNumber > 2000) {
     cron.destory()
   } else {
     videoNumber++
-    await getVideo(videoNumber)
-    upload(videoNumber)
+    let keyword = await getVideo(videoNumber)
+    upload(keyword)
   }
 
 

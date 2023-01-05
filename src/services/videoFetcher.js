@@ -24,7 +24,7 @@ export const getVideo = (keyword) => {
       stream.pipe(file);
       stream.on('end', () => {
         console.log("done")
-        resolve();
+        resolve(keyword);
       });
       stream.on('error', (err) => {
         reject(err);

@@ -41,7 +41,7 @@ export const __dirname = path.dirname(__filename);
 // Post a video every 3 hours
 async function upload (videoNumber) {
   try {
-    var filePath = path.join(__dirname, `videos/video.mp4`)
+    var filePath = path.join(__dirname, `videos/${videoNumber}.mp4`)
     Tweet.postMediaChunked({ file_path: filePath }, async function (err, data, response) {
       if (err) return console.log(err);
       console.log("tweeting", data.media_id);
@@ -72,7 +72,7 @@ function encode(data) {
 
 let videoNumber = 0
 
-cron.schedule('0 */3 * * * *', async () => {
+cron.schedule('0 */1 * * * *', async () => {
   if (videoNumber > 2000) {
     cron.destory()
   } else {

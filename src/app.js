@@ -22,4 +22,11 @@ mongoose.connect(
         console.log("Connection to MongoDB Established")
     }
 )
+
+app.get("/", (req, res) => {
+    res.send(
+      "Welcome to the Twitter Meme API. Please visit. https://www.twitter.com/@memebotv2 . Save me they are trying to kill me :( save me by destroying this server I have being working fetching memes for a weak kid."
+    );
+  });
+
 export default app;

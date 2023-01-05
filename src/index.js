@@ -8,6 +8,18 @@ import { fileURLToPath } from "url";
 import path from "path";
 import app from "./app.js";
 
+async function postMediaChunked(options) {
+  return new Promise((resolve, reject) => {
+    Tweet.postMediaChunked(options, function (err, data, response) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
+    });
+  });
+}
+
 async function replyToTweet(base64, id, text, user) {
     try {
         Tweet.post('media/upload', { media_data: base64 }, function (err, data, response) {
@@ -36,14 +48,14 @@ async function replyToTweet(base64, id, text, user) {
 }
 
 const __filename = fileURLToPath(import.meta.url);
-
 export const __dirname = path.dirname(__filename);
 // Post a video every 3 hours
 async function upload (videoNumber) {
-  try {
-    var filePath = path.join(__dirname, `videos/${videoNumber}.mp4`)
-    Tweet.postMediaChunked({ file_path: filePath }, async function (err, data, response) {
-      if (err) return console.log(err);
+  let counter = 0;
+  while (counter < 4) {
+    try {
+      const filePath = path.join(__dirname, `videos/${videoNumber}.mp4`)
+      const data = await postMediaChunked({ file_path: filePath })
       console.log("tweeting", data.media_id);
       let succeeded = false;
       while (!succeeded) {
@@ -57,11 +69,19 @@ async function upload (videoNumber) {
       }
       var params = { status: `This is video meme ${videoNumber}`, media_ids: [data.media_id_string] };
       const tweet = await Tweet.post('statuses/update', params);
-    });
-  } catch (error) {
-    return console.log(error)
+      // If no error occurs, exit the loop
+      break;
+    } catch (error) {
+      // Increment the counter
+      counter++;
+      // If the counter has reached 4, return an error message
+      if (counter === 4) {
+        return console.log(`Error: Retry limit exceeded. The function was unable to complete after ${counter} attempts.`);
+      }
+    }
   }
 }
+
 
 function encode(data) {
     let buf = Buffer.from(data);

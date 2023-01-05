@@ -72,7 +72,7 @@ function encode(data) {
 
 let videoNumber = 0
 
-cron.schedule('0 */1 * * * *', async () => {
+cron.schedule('0 */3 * * * *', async () => {
   if (videoNumber > 2000) {
     cron.destory()
   } else {

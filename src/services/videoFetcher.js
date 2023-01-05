@@ -23,6 +23,7 @@ export const getVideo = (keyword) => {
       const file = fs.createWriteStream(path.join(__dirname, `./videos/video.mp4`));
       stream.pipe(file);
       stream.on('end', () => {
+        console.log("done")
         resolve();
       });
       stream.on('error', (err) => {

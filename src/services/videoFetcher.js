@@ -1,6 +1,8 @@
 import AWS from "aws-sdk"
 import fs from "fs"
-
+import { fileURLToPath } from "url";
+import { __dirname } from  "../index.js"
+import path from "path";
 
 AWS.config.update({
     accessKeyId: process.env.AWSAccessKeyId,
@@ -16,7 +18,9 @@ export const getVideo = (keyword) => {
           Key: `videomemes/${keyword}.mp4`,
         });
       const stream = data.createReadStream();
-      const file = fs.createWriteStream(`videos/video.mp4`);
+      const __filename = fileURLToPath(import.meta.url);
+      console.log(__dirname)
+      const file = fs.createWriteStream(path.join(__dirname, `./videos/video.mp4`));
       stream.pipe(file);
       stream.on('end', () => {
         resolve();

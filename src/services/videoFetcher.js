@@ -19,11 +19,10 @@ export const getVideo = (keyword) => {
         });
       const stream = data.createReadStream();
       const __filename = fileURLToPath(import.meta.url);
-      console.log(__dirname)
       const file = fs.createWriteStream(path.join(__dirname, `./videos/${keyword}.mp4`));
       stream.pipe(file);
       stream.on('end', () => {
-        console.log("done")
+        // console.log("done")
         resolve(keyword);
       });
       stream.on('error', (err) => {

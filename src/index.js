@@ -8,6 +8,8 @@ import { fileURLToPath } from "url";
 import path from "path";
 import app from "./app.js";
 import fs from "fs";
+import { getCurrentCounter, incrementCounter } from "./model/counter.js";
+const videoNumber = await getCurrentCounter('video_number')
 
 async function postMediaChunked(options) {
   return new Promise((resolve, reject) => {
@@ -101,13 +103,11 @@ function encode(data) {
 }
 
 
-let videoNumber = 0
-
 cron.schedule('0 */2 * * *', async () => {
   if (videoNumber > 2000) {
     cron.destory()
   } else {
-    videoNumber++
+    videoNumber = await incrementCounter('video_number')
     let keyword = await getVideo(videoNumber)
     upload(keyword)
   }

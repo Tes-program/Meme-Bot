@@ -9,7 +9,7 @@ import path from "path";
 import app from "./app.js";
 import fs from "fs";
 import { getCurrentCounter, incrementCounter } from "./model/counter.js";
-const videoNumber = await getCurrentCounter('video_number')
+let videoNumber = await getCurrentCounter('video_number')
 
 async function postMediaChunked(options) {
   return new Promise((resolve, reject) => {
@@ -104,16 +104,17 @@ function encode(data) {
 
 
 cron.schedule('0 */2 * * *', async () => {
-  if (videoNumber > 2000) {
-    cron.destory()
-  } else {
-    videoNumber = await incrementCounter('video_number')
-    let keyword = await getVideo(videoNumber)
-    upload(keyword)
+  try {
+    if (videoNumber > 2000) {
+      cron.destory()
+    } else {
+      let keyword = await getVideo(videoNumber)
+      upload(keyword)
+      videoNumber = await incrementCounter('video_number')
+    }
+  } catch (error) {
+    console.log(error)
   }
-  // Hello there
-
-
 })
 
 
@@ -142,22 +143,24 @@ cron.schedule("0 */1 * * * *", async () => {
       let text = tweet.full_text;
       //  text = text.replace('@memebotv2', '')
       //  text = text.trim()
-      let pattern = /@[^\s]+\s/g;
-      text = text.replace(pattern, '');
-      //  console.log(text)
+      text = text.replace(/@\S+/g, "");
       // get the tweet user
       let user = tweet.user.screen_name;
       //  console.log(user)
       const data = await getImage(text)
-      const base64 = encode(data.Body);
-      //  console.log(base64)
+      let base64 = null
+      if (data) {
+         base64 = encode(data.Body);
+        //  console.log(base64)
+        await replyToTweet(base64, id, text, user);
+      }
+
       await saveMention({
         tweet_id: id,
         tweet_text: text,
         tweet_user: user,
         image_url: base64,
       });
-      await replyToTweet(base64, id, text, user);
       //  console.log(user)
       // save the tweet data to the database
 

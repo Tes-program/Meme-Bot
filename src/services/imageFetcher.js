@@ -7,14 +7,20 @@ AWS.config.update({
     region: 'us-east-1'
 });
  
-export const getImage = async (keyword)  => {
-    const data = new AWS.S3()
-        .getObject({
-            Bucket: 'teslimmeme',
-            Key: `fetchedmeme/${keyword}`
-        })
-        .promise();
-    return data;
+export const getImage = async (keyword) => {
+    try {
+        console.log(keyword)
+        const data = await new AWS.S3()
+            .getObject({
+                Bucket: 'teslimmeme',
+                Key: `fetchedmeme/${keyword}`
+            })
+            .promise()
+        return data;
+    } catch (error) {
+        console.log("error here")
+        return false
+    }
 }
   
  

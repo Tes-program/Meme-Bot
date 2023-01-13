@@ -16,7 +16,7 @@ const mentionSchema = new mongoose.Schema({
     },
     image_url: {
         type: String,
-        required: true,
+        required: false,
     },
     video_url: {
         type: String,

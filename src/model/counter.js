@@ -10,10 +10,16 @@ const counterSchema = new mongoose.Schema({
 
 const Counter = mongoose.model('Counter', counterSchema);
 
+async function createCounter(key, count = 0) {
+  const counter = new Counter({ key, count });
+  await counter.save();
+  return counter
+}
+
 async function getCurrentCounter(key) {
   let counter = await Counter.findOne({ key });
   if (!counter) {
-    counter = new Counter({ key });
+    counter = await createCounter(key, key === 'video_number' ? 10 : 1)
     await counter.save();
   }
   return counter.count;
@@ -27,11 +33,6 @@ async function incrementCounter(key) {
   counter.count += 1;
   await counter.save();
   return counter.count
-}
-
-async function createCounter(key, count = 0) {
-  const counter = new Counter({ key, count });
-  await counter.save();
 }
 
 export { Counter, getCurrentCounter, incrementCounter, createCounter };
